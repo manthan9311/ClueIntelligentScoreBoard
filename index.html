@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Clue Intelligence Suite</title>
+  <!-- Modern Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-logo">
+      <svg class="logo-icon animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        <path d="M11 8v3h3"></path>
+      </svg>
+      <h1>Clue <span class="accent-text">Intel</span></h1>
+    </div>
+
+    <!-- Desktop Navigation (hidden on mobile) -->
+    <nav class="desktop-nav hidden" id="desktop-navigation">
+      <button class="nav-item active" data-tab="scorecard">Scorecard</button>
+      <button class="nav-item" data-tab="suggestions">Suggestions</button>
+      <button class="nav-item" data-tab="intel">Intel</button>
+    </nav>
+
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+      <button id="restart-btn" class="btn btn-secondary btn-sm">Reset</button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="app-container">
+
+    <!-- 1. SETUP VIEW -->
+    <section id="setup-view" class="view-panel active">
+      <div class="card setup-card">
+        <div class="setup-header">
+          <h2>New Investigation</h2>
+          <p>Configure your game theme and active players.</p>
+        </div>
+
+        <form id="setup-form">
+          <!-- Game Theme -->
+          <div class="form-group">
+            <label for="game-theme">Game Edition</label>
+            <select id="game-theme" class="form-control">
+              <option value="classic" selected>Classic Clue (21 cards)</option>
+              <option value="master">Clue Master Detective (30 cards)</option>
+              <option value="hp">Harry Potter Clue (21 cards)</option>
+              <option value="custom">Custom Theme...</option>
+            </select>
+          </div>
+
+          <!-- Custom Deck Configuration (Collapsible) -->
+          <div id="custom-deck-section" class="custom-deck-config hidden">
+            <h3>Custom Deck Builder</h3>
+            <div class="form-group">
+              <label for="custom-suspects">Suspects (Comma separated)</label>
+              <textarea id="custom-suspects" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="custom-weapons">Weapons (Comma separated)</label>
+              <textarea id="custom-weapons" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="custom-rooms">Rooms (Comma separated)</label>
+              <textarea id="custom-rooms" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+
+          <!-- Players configuration -->
+          <div class="form-group">
+            <div class="players-header">
+              <label>Investigators</label>
+              <button type="button" id="add-player-btn" class="btn btn-text-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Player
+              </button>
+            </div>
+            <div id="players-list-container" class="players-setup-list">
+              <!-- Dynamically populated players config -->
+            </div>
+            <div id="card-allocation-warning" class="warning-banner hidden">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Total allocated player cards must equal <strong id="expected-cards-count">18</strong> (Current: <span id="current-allocated-cards">0</span>).</span>
+            </div>
+            <div class="setup-helpers">
+              <button type="button" id="auto-distribute-btn" class="btn btn-secondary btn-sm">Auto-Distribute Cards</button>
+            </div>
+          </div>
+
+          <button type="submit" id="start-game-btn" class="btn btn-primary btn-block">
+            Launch Case Files
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. MAIN ACTIVE GAME VIEW -->
+    <section id="game-view" class="view-panel">
+      <!-- Warnings / Contradictions Bar -->
+      <div id="contradiction-banner" class="error-banner hidden">
+        <div class="error-banner-content">
+          <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <div class="error-text">
+            <h4>Case Contradiction!</h4>
+            <p id="contradiction-message">Logical inconsistency detected in inputs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Solved Header -->
+      <div id="solved-banner" class="solved-banner hidden">
+        <div class="solved-banner-content">
+          <span class="confetti-emoji">🎉</span>
+          <div class="solved-text">
+            <h3>Case Solved!</h3>
+            <p id="solved-details">Envelope contains: ...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scorecard View Tab -->
+      <div id="tab-scorecard" class="game-tab-content active">
+        <!-- Interactive Scorecard Container -->
+        <div class="scorecard-wrapper card">
+          <div class="scorecard-header-row">
+            <h3>Scorecard Grid</h3>
+            <span class="help-text">Tap cells to mark or add round notes. Scroll horizontally for more players.</span>
+          </div>
+          
+          <div class="table-scroll-container">
+            <table class="scorecard-table" id="scorecard-grid">
+              <!-- Dynamically populated matrix -->
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestions View Tab -->
+      <div id="tab-suggestions" class="game-tab-content">
+        <!-- Add Suggestion Card -->
+        <div class="card action-card">
+          <h3>Log New Suggestion</h3>
+          <form id="suggestion-form" class="suggestion-form">
+            <div class="suggestion-row">
+              <div class="form-group flex-1">
+                <label for="sugg-player">Who Suggested?</label>
+                <select id="sugg-player" class="form-control"></select>
+              </div>
+            </div>
+
+            <div class="suggestion-cards-group">
+              <div class="form-group">
+                <label for="sugg-suspect">Suspect</label>
+                <select id="sugg-suspect" class="form-control card-select-suspect"></select>
+              </div>
+              <div class="form-group">
+                <label for="sugg-weapon">Weapon</label>
+                <select id="sugg-weapon" class="form-control card-select-weapon"></select>
+              </div>
+              <div class="form-group">
+                <label for="sugg-room">Room</label>
+                <select id="sugg-room" class="form-control card-select-room"></select>
+              </div>
+            </div>
+
+            <div class="suggestion-refute-section">
+              <label>Clockwise Refutation Flow</label>
+              <div id="refutation-players-flow" class="refutation-flow-list">
+                <!-- Dynamically populated players checkbox list -->
+              </div>
+            </div>
+
+            <div id="revealed-card-section" class="form-group hidden">
+              <label for="sugg-revealed-card">Which card did they show you?</label>
+              <select id="sugg-revealed-card" class="form-control">
+                <option value="">Unspecified (Card hidden from us)</option>
+                <!-- Dynamically filled with the three suggested cards -->
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Log Suggestion</button>
+          </form>
+        </div>
+
+        <!-- Suggestion Timeline -->
+        <div class="card timeline-card">
+          <h3>Suggestion History</h3>
+          <div id="suggestion-timeline-container" class="timeline-container">
+            <div class="timeline-empty">No suggestions logged yet. Logs will feed the solver's logic automatically.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intelligence Dashboard Tab -->
+      <div id="tab-intel" class="game-tab-content">
+        <div class="intel-grid">
+          <!-- Envelope Solution Card -->
+          <div class="card intel-card envelope-prediction-card">
+            <h3>Envelope Status</h3>
+            <div id="envelope-status-container" class="envelope-predictions-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Confirmed Cards Tracker -->
+          <div class="card intel-card confirmed-holdings-card">
+            <h3>Confirmed Card Holdings</h3>
+            <div id="confirmed-holdings-container" class="confirmed-holdings-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation (Mobile First) -->
+  <nav class="bottom-nav hidden" id="app-navigation">
+    <button class="nav-item active" data-tab="scorecard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 3H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"></path>
+        <path d="M9 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"></path>
+        <path d="M21 3h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"></path>
+        <path d="M21 13h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2z"></path>
+      </svg>
+      <span>Scorecard</span>
+    </button>
+    <button class="nav-item" data-tab="suggestions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span>Suggestions</span>
+    </button>
+    <button class="nav-item" data-tab="intel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      <span>Intel</span>
+    </button>
+  </nav>
+
+  <!-- Cell Editor Slider (Modern Mobile Bottom-Sheet Drawer) -->
+  <div class="bottom-sheet-overlay" id="bottom-sheet-overlay"></div>
+  <div class="bottom-sheet" id="cell-editor-sheet">
+    <div class="bottom-sheet-drag-handle"></div>
+    <div class="bottom-sheet-content">
+      <div class="sheet-header">
+        <h3 id="sheet-title">Edit Cell</h3>
+        <p id="sheet-subtitle">Scarlet &bull; Alice</p>
+      </div>
+
+      <!-- Quick Toggles -->
+      <div class="sheet-section">
+        <h4>Logical Status</h4>
+        <div class="quick-status-toggles">
+          <button class="status-toggle-btn btn-no" id="btn-status-no" data-state="-1">
+            <span class="status-icon">❌</span>
+            <span>NO</span>
+          </button>
+          <button class="status-toggle-btn btn-maybe" id="btn-status-maybe" data-state="0">
+            <span class="status-icon">❓</span>
+            <span>MAYBE</span>
+          </button>
+          <button class="status-toggle-btn btn-yes" id="btn-status-yes" data-state="1">
+            <span class="status-icon">✅</span>
+            <span>YES</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Round / Custom Note -->
+      <div class="sheet-section">
+        <h4>Round / Custom Note</h4>
+        <p class="section-help">Mark when this was asked, or add a custom number note.</p>
+        <div class="round-quick-selectors">
+          <button class="round-btn" data-round="">Clear</button>
+          <button class="round-btn" data-round="1">1</button>
+          <button class="round-btn" data-round="2">2</button>
+          <button class="round-btn" data-round="3">3</button>
+          <button class="round-btn" data-round="4">4</button>
+          <button class="round-btn" data-round="5">5</button>
+          <button class="round-btn" data-round="6">6</button>
+        </div>
+        <div class="custom-note-input-row">
+          <input type="text" id="custom-note-input" class="form-control" placeholder="Or type a custom note (e.g. R1, ?, X2)..." maxlength="6">
+        </div>
+      </div>
+
+      <!-- Auto Deduction Explanation -->
+      <div class="sheet-section hidden" id="auto-deduction-section">
+        <div class="deduction-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <div class="deduction-box-content">
+            <h5>Auto-Deduced by Intelligence Engine</h5>
+            <p id="deduction-reason-text">Reason why this was marked.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn btn-secondary btn-block" id="btn-sheet-close">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
