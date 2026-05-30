@@ -12,7 +12,7 @@ const cards = [
   { id: 'scarlet', name: 'Miss Scarlet', category: 'suspect' },
   { id: 'green', name: 'Mr. Green', category: 'suspect' },
   { id: 'peacock', name: 'Mrs. Peacock', category: 'suspect' },
-  { id: 'white', name: 'Mrs. White', category: 'suspect' },
+  { id: 'orchid', name: 'Dr. Orchid', category: 'suspect' },
   { id: 'plum', name: 'Prof. Plum', category: 'suspect' },
   // Weapons
   { id: 'candlestick', name: 'Candlestick', category: 'weapon' },
