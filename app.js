@@ -9,13 +9,13 @@ import { solveGame, STATES } from './solver.js';
 const PRESENTS = {
   classic: {
     name: "Classic Clue",
-    suspects: ["Col. Mustard", "Miss Scarlet", "Mr. Green", "Mrs. Peacock", "Mrs. White", "Prof. Plum"],
+    suspects: ["Col. Mustard", "Miss Scarlet", "Mr. Green", "Mrs. Peacock", "Dr. Orchid", "Prof. Plum"],
     weapons: ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"],
     rooms: ["Kitchen", "Ballroom", "Conservatory", "Dining Room", "Billiard Room", "Library", "Lounge", "Hall", "Study"]
   },
   master: {
     name: "Clue Master Detective",
-    suspects: ["Col. Mustard", "Miss Scarlet", "Mr. Green", "Mrs. Peacock", "Mrs. White", "Prof. Plum", "Miss Peach", "Monsieur Brunette", "Madame Rose", "Sergeant Gray"],
+    suspects: ["Col. Mustard", "Miss Scarlet", "Mr. Green", "Mrs. Peacock", "Dr. Orchid", "Prof. Plum", "Miss Peach", "Monsieur Brunette", "Madame Rose", "Sergeant Gray"],
     weapons: ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench", "Poison", "Horseshoe"],
     rooms: ["Courtyard", "Gazebo", "Drawing Room", "Dining Room", "Kitchen", "Carriage House", "Trophy Room", "Conservatory", "Studio", "Billiard Room", "Library", "Fountain"]
   },
